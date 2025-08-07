@@ -1,0 +1,6 @@
+From_ID,To_ID,Relationship_Type,Color,Start_Date,Notes
+1,2,Advisor,#9cc2e5,2022-09,"PhD advisor relationship"
+2,3,Co-author,#6aa84f,2023-01,"Joint paper on statistical ML"
+3,4,Advisor,#9cc2e5,2024-01,"Master's thesis advisor"
+1,5,Colleague,#9900cc,2020-09,"Same department"
+2,4,Study_Group,#ff9900,2023-09,"Cross-department study group"

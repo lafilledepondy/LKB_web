@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta property="og:title" content="LKB Web" />
+	<meta property="og:image" content="http://thewosochart.000webhostapp.com/img/wosochart.png" />
+	<meta property="og:image:secure_url" content="https://thewosochart.000webhostapp.com/img/wosochart.png" />
+    <title>LKB Web</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style type="text/css">
+      #mynetwork {
+        width: 100%;
+        height: 100%;
+        border: none;
+		margin: auto;
+      }
+	  html, body {
+		margin: 0 !important;
+		padding: 0 !important;
+		height: 100%;
+		width: 100%;
+	  }
+	  form {
+		position: absolute;
+		background-color: #898989;
+		z-index: 10;
+		padding: 10px;
+		border-radius: 0 0 5px 0;
+	}
+    </style>
+
+    <script
+      type="text/javascript"
+      src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+    ></script>
+	
+	<script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"
+    ></script>
+
+    <script type="text/javascript">
+	
+	  var network;
+        var lookupCount = 0;
+        var nodes = [];
+        var edges = [];
+
+        // Default sample data
+        function initializeSampleData() {
+            nodes = [
+                {id: 1, label: 'Sample Person 1', group: 'Team A'},
+                {id: 2, label: 'Sample Person 2', group: 'Team B'},
+                {id: 3, label: 'Sample Person 3', group: 'Team A'}
+            ];
+            edges = [
+                {from: 1, to: 2, label: 'works with'},
+                {from: 2, to: 3, label: 'collaborates'}
+            ];
+        }
+
+        // Load CSV data
+        function loadCSVData() {
+            return new Promise((resolve, reject) => {
+                let peopleLoaded = false;
+                let relationshipsLoaded = false;
+                let peopleData = [];
+                let relationshipsData = [];
+                
+                // Load people CSV
+                Papa.parse('./data/people.csv', {
+                    download: true,
+                    header: true,
+                    complete: function(results) {
+                        console.log('People CSV loaded:', results.data.length, 'rows');
+                        peopleData = results.data;
+                        peopleLoaded = true;
+                        if (relationshipsLoaded) {
+                            processData(peopleData, relationshipsData);
+                            resolve();
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error loading people CSV:', error);
+                        reject(error);
+                    }
+                });
+                
+                // Load relationships CSV
+                Papa.parse('./data/relationships.csv', {
+                    download: true,
+                    header: true,
+                    complete: function(results) {
+                        console.log('Relationships CSV loaded:', results.data.length, 'rows');
+                        relationshipsData = results.data;
+                        relationshipsLoaded = true;
+                        if (peopleLoaded) {
+                            processData(peopleData, relationshipsData);
+                            resolve();
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error loading relationships CSV:', error);
+                        reject(error);
+                    }
+                });
+            });
+        }
+
+        // Process CSV data into nodes and edges
+        function processData(peopleData, relationshipsData) {
+            nodes = [];
+            edges = [];
+            
+            // Create nodes from people data
+            peopleData.forEach(person => {
+                if (person.ID && person.Name) {
+                    nodes.push({
+                        id: parseInt(person.ID),
+                        label: person.Name,
+                        group: person.Department || person.Type || 'notgrouped',
+                        shape: "dot",
+                        value: parseInt(person.Experience_Years) || 5,
+                        title: person.Bio || person.Name
+                    });
+                }
+            });
+            
+            // Create edges from relationships data
+            relationshipsData.forEach(rel => {
+                if (rel.From_ID && rel.To_ID) {
+                    edges.push({
+                        from: parseInt(rel.From_ID),
+                        to: parseInt(rel.To_ID),
+                        label: rel.Relationship_Type || '',
+                        color: rel.Color || '#cccccc',
+                        title: rel.Notes || rel.Relationship_Type
+                    });
+                }
+            });
+            
+            console.log('Processed data:', nodes.length, 'nodes,', edges.length, 'edges');
+        }
+
+        // Try to load data from CSV when page loads
+        async function initializeData() {
+            console.log('Starting data initialization...');
+            
+            // Initialize with sample data first
+            initializeSampleData();
+            
+            try {
+                console.log('Attempting to load CSV data...');
+                await loadCSVData();
+                console.log('CSV data loaded successfully!');
+            } catch (error) {
+                console.error('CSV loading failed:', error);
+                console.log('Using sample data');
+            }
+            
+            draw();
+        }
+
+        function lookup() {
+            const inputField = document.getElementById("lname").value.toLowerCase();
+            const filtered = nodes.filter(e => e.label.toLowerCase().includes(inputField) || (e.group && e.group.toLowerCase().includes(inputField)));
+            if (filtered.length !== 0) {
+                var options = {
+                    scale: 1.0,
+                    offset: {x: 0, y: 0},
+                    animation: {
+                        duration: 1000,
+                        easingFunction: "easeInOutQuad",
+                    },
+                };
+                let filteredPerson = filtered[lookupCount % filtered.length];
+                network.focus(filteredPerson.id, options);
+                network.selectNodes(filtered.map(it => it.id));
+                lookupCount += 1;
+            }
+        }
+	  
+      function draw() {
+        var container = document.getElementById("mynetwork");
+        var data = {
+          nodes: nodes,
+          edges: edges,
+        };
+        var options = {
+          nodes: {
+            shape: "dot",
+			borderWidth: 6,
+            size: 30,
+          },
+		  groups: {
+			notgrouped: {color:{background:'gray', border:'gray'}, borderWidth:3}
+		  },
+          physics: {
+            forceAtlas2Based: {
+              gravitationalConstant: -26,
+              centralGravity: 0.005,
+              springLength: 230,
+              springConstant: 0.18,
+            },
+			barnesHut: {
+				theta: 0.7,
+				gravitationalConstant: -4000,
+				centralGravity: 0.9,
+				springLength: 50,
+				springConstant: 0.08,
+				damping: 0.5,
+				avoidOverlap: 0.3
+		    },
+			repulsion: {
+			  centralGravity: 0.2,
+			  springLength: 180,
+			  springConstant: 0.2,
+			  nodeDistance: 160,
+			  damping: 0.09,
+			},
+
+            maxVelocity: 200,
+            solver: "repulsion",
+            timestep: 0.35,
+            stabilization: { iterations: 40 },
+          },
+        };
+        network = new vis.Network(container, data, options);
+		}
+		let physicsEnabled = true;
+         function togglePhysics() {
+             physicsEnabled = !physicsEnabled;
+             network.setOptions({
+                 physics: {
+                     enabled: physicsEnabled
+                 }
+             });
+              const icon = document.getElementById("physicsIcon");
+               icon.className = physicsEnabled ? "fas fa-pause" : "fas fa-play";
+      }
+    </script>
+  </head>
+
+  <body onload="initializeData()">
+	<form action="javascript:;" onsubmit="lookup()">
+	  <input type="text" id="lname" name="lname" placeholder="Name">
+	  <input type="submit" value="Search">
+	</form>
+	<button
+      id="togglePhysics"
+      style="position: absolute; top: 50px; left: 120px; z-index: 10; padding: 5px 10px; font-size: 21px; background: none; border: none; cursor: pointer;"
+      onclick="togglePhysics()">
+      <i id="physicsIcon" class="fas fa-pause"></i>
+    </button>
+    <div id="mynetwork"></div>
+  </body>
+</html>

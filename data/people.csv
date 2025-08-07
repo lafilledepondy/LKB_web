@@ -1,0 +1,6 @@
+ID,Name,Type,Department,Experience_Years,Image_Filename,Email,Bio
+1,Dr. Jane Smith,Professor,Computer Science,15,jane_smith.jpg,jane.smith@university.edu,"AI researcher specializing in machine learning"
+2,John Doe,PhD Student,Computer Science,3,john_doe.jpg,john.doe@student.edu,"Working on neural networks under Dr. Smith"
+3,Dr. Bob Wilson,Professor,Mathematics,20,bob_wilson.jpg,bob.wilson@university.edu,"Applied mathematics and statistics"
+4,Alice Chen,Master Student,Mathematics,1,alice_chen.jpg,alice.chen@student.edu,"Statistics and data analysis"
+5,Dr. James Johnson,Associate Professor,Computer Science,8,sarah_johnson.jpg,sarah.johnson@university.edu,"Human-computer interaction"
