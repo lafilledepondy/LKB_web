@@ -49,9 +49,9 @@
         // Default sample data
         function initializeSampleData() {
             nodes = [
-                {id: 1, label: 'Sample Person 1', group: 'Team A'},
-                {id: 2, label: 'Sample Person 2', group: 'Team B'},
-                {id: 3, label: 'Sample Person 3', group: 'Team A'}
+                {id: 1, label: 'Sample Person 1', group: 'Team A', shape: "circularImage", image: './img/default.jpg', size: 60},
+                {id: 2, label: 'Sample Person 2', group: 'Team B', shape: "circularImage", image: './img/default.jpg', size: 60},
+                {id: 3, label: 'Sample Person 3', group: 'Team A', shape: "circularImage", image: './img/default.jpg', size: 60}
             ];
             edges = [
                 {from: 1, to: 2, label: 'works with'},
@@ -115,13 +115,20 @@
             // Create nodes from people data
             peopleData.forEach(person => {
                 if (person.ID && person.Name) {
+                    // Use JPG images with proper format
+                    let imageFile = person.Image_Filename || 'default.jpg';
                     nodes.push({
                         id: parseInt(person.ID),
                         label: person.Name,
                         group: person.Department || person.Type || 'notgrouped',
-                        shape: "dot",
+                        shape: "circularImage",
+                        image: `./img/${imageFile}`,
+                        size: 60,
                         value: parseInt(person.Experience_Years) || 5,
-                        title: person.Bio || person.Name
+                        title: person.Bio || person.Name,
+                        borderWidth: 4,
+                        borderWidthSelected: 6,
+                        brokenImage: './img/default.jpg'
                     });
                 }
             });
@@ -188,12 +195,33 @@
         };
         var options = {
           nodes: {
-            shape: "dot",
-			borderWidth: 6,
-            size: 30,
+            shape: "circularImage",
+            size: 60,
+            borderWidth: 4,
+            borderWidthSelected: 6,
+            font: {
+              size: 16,
+              color: '#000000'
+            },
+            chosen: {
+              node: function(values, id, selected, hovering) {
+                values.borderWidth = 6;
+              }
+            },
+            imagePadding: 4,
+            shapeProperties: {
+              useBorderWithImage: true,
+              useImageSize: false,
+              interpolation: true
+            }
           },
 		  groups: {
-			notgrouped: {color:{background:'gray', border:'gray'}, borderWidth:3}
+			notgrouped: {color:{border:'gray'}, borderWidth:3},
+            'Computer Science': {color:{border:'#4285f4'}, borderWidth:3},
+            'Mathematics': {color:{border:'#ea4335'}, borderWidth:3},
+            'Professor': {color:{border:'#34a853'}, borderWidth:3},
+            'PhD Student': {color:{border:'#fbbc05'}, borderWidth:3},
+            'Master Student': {color:{border:'#ff6d01'}, borderWidth:3}
 		  },
           physics: {
             forceAtlas2Based: {
