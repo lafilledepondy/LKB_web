@@ -11,7 +11,7 @@ people = [
     ('john_doe.jpg', 'JD', '#34a853', 'white'),
     ('bob_wilson.jpg', 'BW', '#ea4335', 'white'),
     ('alice_chen.jpg', 'AC', '#fbbc05', 'black'),
-    ('sarah_johnson.jpg', 'SJ', '#ff6d01', 'white'),
+    ('james_johnson.jpg', 'SJ', '#ff6d01', 'white'),
     ('default.jpg', 'User', '#cccccc', 'white')
 ]
 
